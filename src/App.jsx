@@ -31,7 +31,7 @@ export const App = () => {
     if (!sortType) {
       return products;
     }
-    const sorted = [...products].sort ((a,b) => {
+    const sorted = [...products].sort((a, b) => {
       let aValue, bValue;
       if (sortType === 'id') {
         aValue = a.id;
@@ -55,13 +55,13 @@ export const App = () => {
   }
 
   const filteredProducts = products
-  .filter(product =>
-    selectedUserId ? product.user.id === selectedUserId : true)
-  .filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  .filter(product =>
-    selectedCategoryIds.length === 0 ? true :
-    selectedCategoryIds.includes(product.category.id));
+    .filter(product =>
+      selectedUserId ? product.user.id === selectedUserId : true)
+    .filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(product =>
+      selectedCategoryIds.length === 0 ? true :
+        selectedCategoryIds.includes(product.category.id));
 
 
   const handleCategoryToggle = (categoryId) => {
@@ -166,7 +166,7 @@ export const App = () => {
                   data-cy="Category"
                   className={`button mr-2 my-1 ${selectedCategoryIds
                     .includes(category.id) ?
-                     'is-info' : ''}`}
+                    'is-info' : ''}`}
                   href="#/"
                   onClick={() => handleCategoryToggle(category.id)}
                 >
@@ -196,7 +196,7 @@ export const App = () => {
 
         <div className='box table-container'>
 
-          {filteredProducts.length === 0 ? (
+          {sortedProducts.length === 0 ? (
             <p data-cy="NoMatchingMessage">
               No products matching selected criteria
             </p>
@@ -211,11 +211,15 @@ export const App = () => {
                     <span className="is-flex is-flex-wrap-nowrap">
                       ID
                       <a
-                      href="#/"
-                      onClick={handleSort('id')}
+                        href="#/"
+                        onClick={() => handleSort('id')}
                       >
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
+                          <i data-cy="SortIcon" className={`fas ${sortType === 'id'
+                            ? (isReversed ? 'fa-sort-down' : 'fa-sort-up')
+                            : 'fa-sort'
+                            }`} />
+
                         </span>
                       </a>
                     </span>
@@ -225,11 +229,15 @@ export const App = () => {
                     <span className="is-flex is-flex-wrap-nowrap">
                       Product
                       <a
-                      href="#/"
-                      onClick={() => handleSort('name')}
+                        href="#/"
+                        onClick={() => handleSort('name')}
                       >
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort-down" />
+                          <i data-cy="SortIcon" className={`fas ${sortType === 'name'
+                              ? (isReversed ? 'fa-sort-down' : 'fa-sort-up')
+                              : 'fa-sort'
+                            }`} />
+
                         </span>
                       </a>
                     </span>
@@ -239,11 +247,15 @@ export const App = () => {
                     <span className="is-flex is-flex-wrap-nowrap">
                       Category
                       <a
-                      href="#/"
-                      onClick={() => handleSort('category')}
+                        href="#/"
+                        onClick={() => handleSort('category')}
                       >
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort-up" />
+                          <i data-cy="SortIcon" className={`fas ${sortType === 'category'
+                              ? (isReversed ? 'fa-sort-down' : 'fa-sort-up')
+                              : 'fa-sort'
+                            }`} />
+
                         </span>
                       </a>
                     </span>
@@ -253,11 +265,15 @@ export const App = () => {
                     <span className="is-flex is-flex-wrap-nowrap">
                       User
                       <a
-                      href="#/"
-                      onClick={() => handleSort('user')}
+                        href="#/"
+                        onClick={() => handleSort('user')}
                       >
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
+                          <i data-cy="SortIcon" className={`fas ${sortType === 'user'
+                              ? (isReversed ? 'fa-sort-down' : 'fa-sort-up')
+                              : 'fa-sort'
+                            }`} />
+
                         </span>
                       </a>
                     </span>
