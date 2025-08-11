@@ -23,13 +23,46 @@ const products = productsFromServer.map(product => {
 export const App = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [sortType, setSortType] = useState('');
+  const [isReversed, setIsReversed] = useState(false);
+
+  const getSortedProducts = (products, sortType, isReversed) => {
+    if (!sortType) {
+      return products;
+    }
+    const sorted = [...products].sort ((a,b) => {
+      let aValue, bValue;
+      if (sortType === 'id') {
+        aValue = a.id;
+        bValue = b.id;
+      } else if (sortType === 'name') {
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+      } else if (sortType === 'category') {
+        aValue = a.category.title.toLowerCase();
+        bValue = b.category.title.toLowerCase();
+      } else if (sortType === 'user') {
+        aValue = a.user.name.toLowerCase();
+        bValue = b.user.name.toLowerCase();
+      }
+      if (aValue < bValue) return isReversed ? 1 : -1;
+      if (aValue > bValue) return isReversed ? -1 : 1;
+      return 0;
+    });
+
+    return sorted;
+  }
 
   const filteredProducts = products
-    .filter(product =>
-      selectedUserId ? product.user.id === selectedUserId : true)
-    .filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  .filter(product =>
+    selectedUserId ? product.user.id === selectedUserId : true)
+  .filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  .filter(product =>
+    selectedCategoryIds.length === 0 ? true :
+    selectedCategoryIds.includes(product.category.id));
+
 
   const handleCategoryToggle = (categoryId) => {
     setSelectedCategoryIds(prev =>
@@ -38,6 +71,21 @@ export const App = () => {
         : [...prev, categoryId]
     );
   };
+
+  const handleSort = (type) => {
+    if (sortType !== type) {
+      setSortType(type);
+      setIsReversed(false);
+    }
+    else if (!isReversed) {
+      setIsReversed(true);
+    } else {
+      setSortType('');
+      setIsReversed(false);
+    }
+  };
+
+  const sortedProducts = getSortedProducts(filteredProducts, sortType, isReversed);
 
 
   return (
@@ -104,16 +152,23 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={`button is-success mr-6
+                  ${selectedCategoryIds.length === 0 ? ''
+                    : 'is-outlined'}`}
+                onClick={() => setSelectedCategoryIds([])}
               >
                 All
               </a>
 
               {categoriesFromServer.map(category => (
                 <a
+                  key={category.id}
                   data-cy="Category"
-                  className="button mr-2 my-1 is-info"
+                  className={`button mr-2 my-1 ${selectedCategoryIds
+                    .includes(category.id) ?
+                     'is-info' : ''}`}
                   href="#/"
+                  onClick={() => handleCategoryToggle(category.id)}
                 >
                   {category.title}
                 </a>
@@ -128,6 +183,9 @@ export const App = () => {
                 onClick={() => {
                   setSelectedUserId(null);
                   setSearchQuery('');
+                  setSelectedCategoryIds([]);
+                  setSortType('');
+                  setIsReversed(false);
                 }}
               >
                 Reset all filters
@@ -152,7 +210,10 @@ export const App = () => {
                   <th>
                     <span className="is-flex is-flex-wrap-nowrap">
                       ID
-                      <a href="#/">
+                      <a
+                      href="#/"
+                      onClick={handleSort('id')}
+                      >
                         <span className="icon">
                           <i data-cy="SortIcon" className="fas fa-sort" />
                         </span>
@@ -163,7 +224,10 @@ export const App = () => {
                   <th>
                     <span className="is-flex is-flex-wrap-nowrap">
                       Product
-                      <a href="#/">
+                      <a
+                      href="#/"
+                      onClick={() => handleSort('name')}
+                      >
                         <span className="icon">
                           <i data-cy="SortIcon" className="fas fa-sort-down" />
                         </span>
@@ -174,7 +238,10 @@ export const App = () => {
                   <th>
                     <span className="is-flex is-flex-wrap-nowrap">
                       Category
-                      <a href="#/">
+                      <a
+                      href="#/"
+                      onClick={() => handleSort('category')}
+                      >
                         <span className="icon">
                           <i data-cy="SortIcon" className="fas fa-sort-up" />
                         </span>
@@ -185,7 +252,10 @@ export const App = () => {
                   <th>
                     <span className="is-flex is-flex-wrap-nowrap">
                       User
-                      <a href="#/">
+                      <a
+                      href="#/"
+                      onClick={() => handleSort('user')}
+                      >
                         <span className="icon">
                           <i data-cy="SortIcon" className="fas fa-sort" />
                         </span>
@@ -196,7 +266,7 @@ export const App = () => {
               </thead>
 
               <tbody>
-                {filteredProducts.map(product => (
+                {sortedProducts.map(product => (
                   <tr data-cy="Product" key={product.id}>
                     <td className="has-text-weight-bold" data-cy="ProductId">
                       {product.id}
@@ -227,3 +297,4 @@ export const App = () => {
     </div>
   );
 };
+
